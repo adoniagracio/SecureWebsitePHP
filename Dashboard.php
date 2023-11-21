@@ -22,19 +22,46 @@ header("X-Frame-Options: SAMEORIGIN");
 header("X-Content-Type-Options: nosniff");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+
+require "./Controllers/koneksi.php";
+$sql = "SELECT gnarab_ID,nama_gnarab FROM gnarab";
+$result = $db->query($sql);
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <h1>TITIT</h1>
+    <title>List barang</title>
 </head>
-<body>
-    
 
+<body>
+    <h1>List barang</h1>
     <a href="logout.php">Logout</a>
-</body>
+    <form action="controllers/newBarang.php" method="POST">
+            <input type="text" name="newStock" placeholder="nama baru" required>
+            <input type="submit" value="add">
+    </form>
+    <table>
+        <tr>
+            <th>barang Name</th>
+        </tr>
+        <?php while ($row = $result->fetch_assoc()) : ?>
+            <tr>
+                <td><?php echo $row['nama_gnarab']; ?></td>
+                <td>
+                <form action="controllers/updatebarang.php" method="POST">
+                        <input type="hidden" name="gnarab_ID" value="<?php echo $row['gnarab_ID']; ?>">
+                        <input type="text" name="newStock" placeholder="nama baru" required>
+                        <input type="submit" value="Ganti Nama">
+                </form>
+                <form action="controllers/deleteBarang.php" method="POST">
+                        <input type="hidden" name="gnarab_ID" value="<?php echo $row['gnarab_ID']; ?>">
+                        <input type="submit" value="hapus">
+                </form>
+                
+                </td>
+            </tr>
+        <?php endwhile; ?>
+    </table>
+
 </html>

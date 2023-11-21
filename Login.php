@@ -1,5 +1,8 @@
 <?php
 session_start();
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); // Generating a random token
+}
 
 // Regenerate the session ID periodically
 if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > 1800) {
@@ -29,14 +32,13 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
     <title>Secure Website</title>
 </head>
 <body>
-    <?php
-    ?>
     <div class="container">
-            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>" />
         <div class="row">
             <div class="col-md-6">
                 <div class="card">
                     <form class="box" action="Controllers/AuthController.php" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>" />
+
                         <h1>Login</h1>
                         <?php
                         // Display error message if it exists in the session
