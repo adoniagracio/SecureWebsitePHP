@@ -1,0 +1,44 @@
+<?php
+// login_process.php
+
+require "./koneksi.php";
+session_start();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['email'];
+    $pass = $_POST['password'];
+
+    if ($db->connect_error) {
+        die("Connection failed: " . $db->connect_error);
+    }
+
+    $query = "SELECT * FROM users WHERE email=?";
+    $stmt = $db->prepare($query);
+    if (!$stmt) {
+        die("Error preparing statement: " . $db->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+
+    $select_users = $stmt->get_result();
+
+    $row = mysqli_fetch_assoc($select_users);
+
+    if (mysqli_num_rows($select_users) === 1 && password_verify($pass, $row['password'])) {
+        session_regenerate_id(true);
+        $_SESSION['session_id'] = session_id();
+        $_SESSION['is_login'] = true;
+        $seconds_per_day = 86400;
+        $cookie_expiry = time() + (7 * $seconds_per_day);
+        setcookie('user_email', $email, $cookie_expiry);
+        header("Location: ../Dashboard.php");
+    } else {
+        $_SESSION["error_message"] = "Incorrect email or password";
+        header("Location: ../Login.php");
+    }
+} else {
+    $_SESSION["error_message"] = "Incorrect email or password";
+    header("Location: ../Login.php");
+}
+?>

@@ -23,3 +23,10 @@
 //         return;
 //     }
 // }
+
+const phoneInput = document.getElementById('phone');
+
+if (!/\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/.test(phoneInput)) {
+    alert("Please enter a valid Indonesian phone number!");
+    return false;
+}
