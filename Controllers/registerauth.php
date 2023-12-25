@@ -3,10 +3,10 @@
     session_start();
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $phone = $_POST['phone'];
-        $password = $_POST['password'];
+        $name = mysqli_real_escape_string($db, $_POST['name']);
+        $email = mysqli_real_escape_string($db, $_POST['email']);
+        $phone = mysqli_real_escape_string($db, $_POST['phone']);
+        $password = trim(mysqli_real_escape_string($db, $_POST['password']));
         
         if (empty($name) || empty($email) || empty($phone) || empty($password)) {
             $_SESSION["error_message"] = "All fields are required";
@@ -35,11 +35,17 @@
         }
 
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        
         $insert_query = "INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)";
         $insert_stmt = $db->prepare($insert_query);
         if (!$insert_stmt) {
             die("Error preparing statement: " . $db->error);
         }
+
+        $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        $email = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+        $pass = htmlspecialchars($pass, ENT_QUOTES, 'UTF-8');
+        $user_type = htmlspecialchars($user_type, ENT_QUOTES, 'UTF-8');
 
         $insert_stmt->bind_param("ssss", $name, $email, $phone, $hashed_password);
         $insert_stmt->execute();

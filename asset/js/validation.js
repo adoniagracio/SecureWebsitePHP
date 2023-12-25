@@ -24,9 +24,30 @@
 //     }
 // }
 
-const phoneInput = document.getElementById('phone');
+// const phoneInput = document.getElementById('phone');
 
-if (!/\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/.test(phoneInput)) {
-    alert("Please enter a valid Indonesian phone number!");
-    return false;
+// if (!/\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/.test(phoneInput)) {
+//     alert("Please enter a valid Indonesian phone number!");
+//     return false;
+// }
+
+function validateFormPass() {
+    var password1 = document.getElementById("password").value;
+    var password = password1.replace(/\s+/g, ' ');
+    var passwordRegex = /^(?!.* )(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(?=.*[0-9])(?=.*[A-Z]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+        alert("Password must be at least 8 characters long and contain at least one special character, one number, and one uppercase letter.");
+        return false;
+    }
+    return true;
+}
+
+function validateFromPhone(){
+    var phone = document.getElementById("phone").value;
+    var phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+    if(!phoneRegex.test(phone)){
+        alert("Invalid phone");
+        return false;
+    }
+    return true;
 }

@@ -2,6 +2,25 @@
 session_start();
 require 'Controllers/condb.php';
 
+$sid = $_SESSION["user_id"];
+$query = "SELECT sesi FROM users WHERE id = '$sid';";
+$result = $con->query($query);
+
+if ($result) {
+    $row = $result->fetch_assoc();
+    $sesiFromDatabase = $row['sesi'];
+
+    // Periksa apakah session_id dari sesi saat ini tidak sama dengan sesi dari database
+    if ($_SESSION['session_id'] !== $sesiFromDatabase) {
+        header("Location: login.php");
+        session_unset();
+        session_destroy();
+        $_SESSION = array();
+        $_SESSION['is_login'] = false;
+        exit;
+    }
+}
+
 if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > 1800) {
     session_regenerate_id(true); // Regenerate session ID if inactive for more than 1800 seconds (30 minutes)
     $_SESSION['last_activity'] = time(); // Update last activity time
@@ -39,6 +58,10 @@ $result = $db->query($sql);
     <title>Dashboard</title>
 </head>
 <body> 
+    <?php 
+    $name = $_SESSION['username'];
+    echo "halo ". htmlspecialchars($name) ."!";
+    ?>
     <div class="container mt-4">
         <?php include('Controllers/message.php'); ?>
         <div class="row">
