@@ -34,7 +34,7 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
         <div class="row">
             <div class="col-md-6">
                 <div class="card">
-                    <form class="box" action="Controllers/registerauth.php" onsubmit="return validateFormPass() && validateFromPhone()" method="POST">
+                    <form class="box" action="Controllers/registerauth.php" method="POST">
                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>" />
 
                         <h1>Sign Up</h1>
@@ -50,7 +50,7 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
                         <input type="tel" name="phone" placeholder="Phone Number" id="phone" required>
                         <input type="password" name="password" placeholder="Password" id="password" required>
                         <span class="text" style="color: white;">if you already have an account <a class="forgot text-muted" href="./Login.php">Sign In</a></span>
-                        <input type="submit" name="Register" value="Sign Up">
+                         <input type="submit" name="Register" value="Sign Up">
                     </form>
                 </div>
             </div>

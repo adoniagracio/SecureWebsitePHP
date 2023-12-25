@@ -24,7 +24,7 @@ session_start();
                   <label>Product Name</label>
                   <input type="text" name="name" class="form-control">
                 </div>
-                <!-- <div class="mb-3">
+                <div class="mb-3">
                   <label>Product Picture</label>
                   <input type="file" name="picture" class="form-control">
                 </div>
@@ -40,7 +40,7 @@ session_start();
                 <div class="mb-3">
                   <label for="expirationDate">Expiration Date</label>
                   <input type="date" name="expiration_date" class="form-control">
-                </div> -->
+                </div>
                 <div class="mb-3">
                   <button type="submit" name="add_product" class="btn btn-primary">Add Product</button>
                 </div>
