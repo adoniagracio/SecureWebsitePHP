@@ -44,7 +44,7 @@
             <?php include('Controllers/message.php'); ?>
             <div class="row">
             <div class="col">
-                <p class="text-muted">Hello, <?= $_SESSION['username']; ?>!</p>
+                <p class="text-muted">Hello, <?= htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'UTF-8') ?>!</p>
                 <a href="logout.php" class="btn btn-danger float-end">Logout</a>
             </div>
         </div>
