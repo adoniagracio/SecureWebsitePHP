@@ -4,8 +4,11 @@
 require 'condb.php';
 
 $sid = $_SESSION["user_id"];
-$query = "SELECT sesi FROM users WHERE id = '$sid';";
-$result = $con->query($query);
+$query = "SELECT sesi FROM users WHERE id = ?";
+$prepstate = $con->prepare($query);
+$prepstate->bind_param("i",$sid);
+$prepstate->execute();
+$result = $prepstate->get_result();
 $row = $result->fetch_assoc();
 $sesiFromDatabase = $row['sesi'];
 function check($sesiFromDatabase)
@@ -22,8 +25,10 @@ function check($sesiFromDatabase)
 
 if($_SESSION['is_login'] !== true) {
     header("Location: ../login.php");
-    exit(); // Ensure no further content is processed after redirection
+    exit(); 
 }
+
+
 
 
 if (isset($_POST['delete_product'])) {
@@ -107,7 +112,10 @@ if (isset($_POST['update_product'])) {
     $prep_state->execute();
 
     if (!empty($update_image)) {
-        mysqli_query($con, "UPDATE `product` SET gambar_product = '$update_image' WHERE SHA2(id_product, 256) = '$barang_id' ") or die('Query failed');
+        $query = "UPDATE `product` SET gambar_product = ? WHERE SHA2(id_product, 256) = ?";
+        $update_stmt = $con->prepare($query);
+        $update_stmt->bind_param("si", $update_image, $barang_id);
+        $update_stmt->execute();        
         move_uploaded_file($image_tmp_name, $image_folder);
     }
 
