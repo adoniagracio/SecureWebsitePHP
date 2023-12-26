@@ -10,7 +10,7 @@ function validateForm() {
     if ( email.trim() === '' || password.trim() === '') {
         displayErrorMessage('All fields must be filled out');
         return false;
-    }
+    }   
     return true; 
 
     function displayErrorMessage(message) {

@@ -73,11 +73,24 @@ if (isset($_POST['delete_product'])) {
 if (isset($_POST['update_product'])) {
     check($sesiFromDatabase);
 
-    $name = mysqli_real_escape_string($con, $_POST['name']);
+    $name = trim(mysqli_real_escape_string($con, $_POST['name']));
+    if ($name === '') {
+        $_SESSION['message'] = 'Product Name cannot be empty or contain only spaces';
+        header("Location: ../Dashboard.php");
+        exit(0);
+    }
+
     $update_image = $_FILES['image']['name'];
     $imagesize = $_FILES['image']['size'];
     $price = mysqli_real_escape_string($con, $_POST['price']);
-    $quantity = mysqli_real_escape_string($con, $_POST['quantity']);
+    $quantity = trim(mysqli_real_escape_string($con, $_POST['quantity']));
+
+    if ($quantity === '') {
+        $_SESSION['message'] = 'Quantity cannot be empty or contain only spaces';
+        header("Location: ../Dashboard.php");
+        exit(0);
+    }
+
     $expiration_date = mysqli_real_escape_string($con, $_POST['expiration_date']);
     $image_tmp_name = $_FILES['image']['tmp_name'];
     $image_folder = '../uploaded_img/' . $update_image;
@@ -85,58 +98,68 @@ if (isset($_POST['update_product'])) {
     $barang_id = $_POST['barang_id'];
     $update_image_extension = strtolower(pathinfo($update_image, PATHINFO_EXTENSION));
 
-
-    if (!in_array($update_image_extension, $allowed_extensions)) {
-        $_SESSION['message'] = 'Only JPEG, JPG, and PNG files are allowed';
-        header("Location: ../UpdateBarang.php");
-        exit(0); 
-    }
-
- 
-    if ($imagesize > 2000000) {
-        $_SESSION['message'] = 'Image file size is too large.';
-        header("Location: ../UpdateBarang.php");
-        exit(0); 
-    }
-
-
     $query = "UPDATE product SET 
-                nama_product = ?, 
-                quantity = ?, 
-                harga_product = ?, 
-                tanggal_exp_product = ? 
-                WHERE SHA2(id_product, 256) = ?";
-
+        nama_product = ?, 
+        quantity = ?, 
+        harga_product = ?, 
+        tanggal_exp_product = ? 
+        WHERE SHA2(id_product, 256) = ?";
+    
     $prep_state = $con->prepare($query);
     $prep_state->bind_param("ssssi", $name, $quantity, $price, $expiration_date, $barang_id);
     $prep_state->execute();
-
+    
     if (!empty($update_image)) {
-        $query = "UPDATE `product` SET gambar_product = ? WHERE SHA2(id_product, 256) = ?";
-        $update_stmt = $con->prepare($query);
-        $update_stmt->bind_param("si", $update_image, $barang_id);
-        $update_stmt->execute();        
+        if (!in_array($update_image_extension, $allowed_extensions)) {
+            $_SESSION['message'] = 'Only JPEG, JPG, and PNG files are allowed';
+            header("Location: ../UpdateBarang.php");
+            exit(0);
+        }
+
+        if ($imagesize > 2000000) {
+            $_SESSION['message'] = 'Image file size is too large.';
+            header("Location: ../UpdateBarang.php");
+            exit(0);
+        }
+
+        $query_image = "UPDATE product SET gambar_product = ? WHERE SHA2(id_product, 256) = ?";
+        $prep_state_image = $con->prepare($query_image);
+        $prep_state_image->bind_param("si", $update_image, $barang_id);
+        $prep_state_image->execute();
+
         move_uploaded_file($image_tmp_name, $image_folder);
     }
 
     $_SESSION['message'] = "Update Data Successfully";
     header("Location: ../Dashboard.php");
-    exit(0); 
+    exit();
 }
 
 
 
 
 
-
-
 if (isset($_POST['add_product'])) {
-    check($sesiFromDatabase);
-    $name = mysqli_real_escape_string($con, $_POST['name']);
+    check($sesiFromDatabase);   
+    $name = trim(mysqli_real_escape_string($con, $_POST['name']));
+
+    if ($name === '') {
+        $_SESSION['message'] = 'Product Name cannot be empty or contain only spaces';
+        header("Location: ../Addproduct.php");
+        exit(0);
+    }
+
     $image = $_FILES['picture']['name']; 
     $imagesize = $_FILES['picture']['size']; 
     $price = mysqli_real_escape_string($con, $_POST['price']);
-    $quantity = mysqli_real_escape_string($con, $_POST['quantity']);
+    $quantity = trim(mysqli_real_escape_string($con, $_POST['quantity']));
+
+    if ($name === '') {
+        $_SESSION['message'] = 'quantity cannot be empty or contain only spaces';
+        header("Location: ../Addproduct.php");
+        exit(0);
+    }
+
     $expiration_date = mysqli_real_escape_string($con, $_POST['expiration_date']);
     $image_tmp_name = $_FILES['picture']['tmp_name'];
     $image_folder = '../uploaded_img/' . $image;
@@ -153,19 +176,20 @@ if (isset($_POST['add_product'])) {
     if($imagesize > 2000000){
         $_SESSION['message'] = 'Image size is too large';
     }
-        $query = "INSERT INTO product (id_user,nama_product, gambar_product, harga_product, tanggal_exp_product,quantity) VALUES (?,?, ?, ?, ? ,?)";
-        $stmt = mysqli_prepare($con, $query);
-    
-        $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-        $price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
-        $expiration_date = htmlspecialchars($expiration_date, ENT_QUOTES, 'UTF-8');
-        $quantity = htmlspecialchars($quantity, ENT_QUOTES, 'UTF-8');
-    
-        mysqli_stmt_bind_param($stmt, "isssss",$sid, $name, $image, $price, $expiration_date, $quantity);
-    
-        $add_product_query = mysqli_stmt_execute($stmt);
+
 
             if (move_uploaded_file($image_tmp_name, $image_folder)) {
+                $query = "INSERT INTO product (id_user,nama_product, gambar_product, harga_product, tanggal_exp_product,quantity) VALUES (?,?, ?, ?, ? ,?)";
+                $stmt = mysqli_prepare($con, $query);
+                $image = htmlspecialchars($image, ENT_QUOTES, 'UTF-8');
+                $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+                $price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+                $expiration_date = htmlspecialchars($expiration_date, ENT_QUOTES, 'UTF-8');
+                $quantity = htmlspecialchars($quantity, ENT_QUOTES, 'UTF-8');
+            
+                mysqli_stmt_bind_param($stmt, "isssss",$sid, $name, $image, $price, $expiration_date, $quantity);
+            
+                $add_product_query = mysqli_stmt_execute($stmt);
                 $_SESSION['message'] = "Product Added Successfully";
                 header("Location: ../Addproduct.php");
                 

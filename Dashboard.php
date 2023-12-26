@@ -80,11 +80,11 @@
                                             while ($barang = $result->fetch_assoc()) {
                                                 ?>
                                                 <tr>
-                                                    <td><?= $barang['nama_product']; ?></td>
-                                                    <td><img src="<?= 'uploaded_img/' . $barang['gambar_product']; ?>" alt="Product Image" style="width: 200px; height: 200px;"></td>
-                                                    <td><?= "Rp. " . $barang['harga_product'] ?></td>
-                                                    <td><?= $barang['quantity']; ?></td>
-                                                    <td><?= $barang['tanggal_exp_product']; ?></td>
+                                                    <td><?= htmlspecialchars($barang['nama_product'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td><img src="<?= 'uploaded_img/' . htmlspecialchars($barang['gambar_product'], ENT_QUOTES, 'UTF-8'); ?>" alt="Product Image" style="width: 200px; height: 200px;"></td>
+                                                    <td><?= "Rp. " . htmlspecialchars($barang['harga_product'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td><?= htmlspecialchars($barang['quantity'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td><?= htmlspecialchars($barang['tanggal_exp_product'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                     <td>
                                                         <form action="UpdateBarang.php" method="POST" class="d-inline">
                                                             <input type="hidden" name="product_id" value="<?= hash('sha256', $barang['id_product']); ?>">

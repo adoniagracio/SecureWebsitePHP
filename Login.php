@@ -15,6 +15,8 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
     header("Location: Dashboard.php");
     exit();
 }
+
+
 ?>
 
 <!DOCTYPE html>

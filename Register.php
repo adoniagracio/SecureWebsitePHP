@@ -15,6 +15,14 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
     header("Location: Dashboard.php");
     exit();
 }
+
+header("X-XSS-Protection: 1; mode=block");
+header("X-Frame-Options: SAMEORIGIN");
+header("X-Content-Type-Options: nosniff");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+
+
 ?>
 
 <!DOCTYPE html>

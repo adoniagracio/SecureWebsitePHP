@@ -26,7 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = mysqli_fetch_assoc($select_users);
     
         if (mysqli_num_rows($select_users) === 1 && password_verify($pass, $row['password'])) {
-            // Destroy any existing session
             session_unset();
             session_destroy();
             session_unset();
