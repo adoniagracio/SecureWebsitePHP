@@ -1,75 +1,182 @@
 <?php
     session_start();
+
 require 'condb.php';
 
-if(isset($_POST['delete_product']))
+$sid = $_SESSION["user_id"];
+$query = "SELECT sesi FROM users WHERE id = '$sid';";
+$result = $con->query($query);
+$row = $result->fetch_assoc();
+$sesiFromDatabase = $row['sesi'];
+function check($sesiFromDatabase)
 {
-    $productid = mysqli_real_escape_string($con, $_POST['delete_product']);
+        if ($_SESSION['session_id'] !== $sesiFromDatabase) {
+            header("Location: ../login.php");
+            session_unset();
+            session_destroy();
+        $_SESSION = array();
+        $_SESSION['is_login'] = false;
+            exit();
+        }
+}
 
-    $query = "DELETE FROM product WHERE id_product='$productid' ";
-    $query_run = mysqli_query($con, $query);
+if($_SESSION['is_login'] !== true) {
+    header("Location: ../login.php");
+    exit(); // Ensure no further content is processed after redirection
+}
 
-    if($query_run)
-    {
-        $_SESSION['message'] = "Product Deleted Successfully";
-        header("Location: ../Dashboard.php");
-        exit(0);
-    }
-    else
-    {
-        $_SESSION['message'] = "Product Not Deleted";
+
+if (isset($_POST['delete_product'])) {
+    check($sesiFromDatabase);
+    $hashedProductId = mysqli_real_escape_string($con, $_POST['barang_id']);
+    $query = "SELECT id_product, gambar_product FROM product WHERE SHA2(id_product, 256) = ?";
+    $stmt = mysqli_prepare($con, $query);
+    mysqli_stmt_bind_param($stmt, "s", $hashedProductId);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($result && $row = mysqli_fetch_assoc($result)) {
+        $productId = $row['id_product'];
+        $imageFilename = $row['gambar_product'];
+        $image_folder = '../uploaded_img/' . $imageFilename;
+        if (file_exists($image_folder)) {
+            unlink($image_folder);
+        }
+        $deleteQuery = "DELETE FROM product WHERE id_product = ?";
+        $deleteStmt = mysqli_prepare($con, $deleteQuery);
+        mysqli_stmt_bind_param($deleteStmt, "i", $productId);
+        $deleteQueryResult = mysqli_stmt_execute($deleteStmt);
+
+        if ($deleteQueryResult) {
+            $_SESSION['message'] = "Product and Image Deleted Successfully";
+            header("Location: ../Dashboard.php");
+            exit(0);
+        } else {
+            $_SESSION['message'] = "Product Not Deleted";
+            header("Location: ../Dashboard.php");
+            exit(0);
+        }
+    } else {
+        $_SESSION['message'] = "Product Not Found";
         header("Location: ../Dashboard.php");
         exit(0);
     }
 }
 
-if(isset($_POST['update_product']))
-{
-    $productid = mysqli_real_escape_string($con, $_POST['product_id']);
-    $name = mysqli_real_escape_string($con, $_POST['name']);
-    $query = "UPDATE product SET nama_product ='$name' WHERE id_product='$productid' ";
-    $query_run = mysqli_query($con, $query);
-
-    if($query_run)
-    {
-        $_SESSION['message'] = "Product Updated Successfully";
-        header("Location: ../Dashboard.php");
-        exit(0);
-    }
-    else
-    {
-        $_SESSION['message'] = "Product Not Updated";
-        header("Location: ../Dashboard.php");
-        exit(0);
-    }
-
-}
 
 
-if(isset($_POST['add_product']))
-{
-    $name = htmlspecialchars(trim(mysqli_real_escape_string($con, $_POST['name'])));
-    // berikut validasi untuk nama produk
-    if (empty($name)) {
-        $_SESSION['message'] = "Product name cannot be empty";
-        header("Location: ../Addproduct.php");
-        exit(0);
-    }
-
-    $query = "INSERT INTO product (nama_product) VALUES ('$name')";
+if (isset($_POST['update_product'])) {
+    check($sesiFromDatabase);
     
-    $query_run = mysqli_query($con, $query);
-    if($query_run)
-    {
-        $_SESSION['message'] = "Product Add Successfully";
-        header("Location: ../Addproduct.php");
-        exit(0);
-    }
-    else
-    {
-        $_SESSION['message'] = "Product Not Created";
-        header("Location: ../Addproduct.php");
-        exit(0);
-    }
+    $name = mysqli_real_escape_string($con, $_POST['name']);
+    $update_image = $_FILES['image']['name'];
+    $imagesize = $_FILES['image']['size'];
+    $price = mysqli_real_escape_string($con, $_POST['price']);
+    $quantity = mysqli_real_escape_string($con, $_POST['quantity']);
+    $expiration_date = mysqli_real_escape_string($con, $_POST['expiration_date']);
+    $image_tmp_name = $_FILES['image']['tmp_name'];
+    $image_folder = '../uploaded_img/' . $update_image;
+    $allowed_extensions = array('jpg', 'jpeg', 'png');
+    $barang_id = $_POST['barang_id'];
+    $update_image_extension = strtolower(pathinfo($update_image, PATHINFO_EXTENSION));
+
+
+
+    $query =  "UPDATE product SET 
+    nama_product = ?, 
+    quantity = ?, 
+    harga_product = ?, 
+    tanggal_exp_product = ? 
+    WHERE SHA2(id_product, 256) = ?";
+
+
+    $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+    $price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+    $expiration_date = htmlspecialchars($expiration_date, ENT_QUOTES, 'UTF-8');
+    $quantity = htmlspecialchars($quantity, ENT_QUOTES, 'UTF-8');
+    $barang_id = htmlspecialchars($barang_id, ENT_QUOTES, 'UTF-8');
+
+    $prep_state = $con->prepare($query);
+    $prep_state->bind_param( "ssssi", $name, $quantity, $price, $expiration_date, $barang_id);
+    $prep_state->execute();
+
+
+    if (!in_array($update_image_extension, $allowed_extensions)) {
+     } else {
+         if (!empty($update_image)) {
+             if ($imagesize > 2000000) {
+                $_SESSION['message'] = 'Image file size is too large.';
+             } else {
+                 mysqli_query($con,"UPDATE `product` SET gambar_product = '$update_image' WHERE SHA2(id_product, 256) = '$barang_id' ") or die('Query failed');
+                 move_uploaded_file($image_tmp_name, $image_folder);
+                 $_SESSION['message'] = "Update Data Successfully";
+                 header("Location: ../Dashboard.php");
+             }
+             
+         }
+        }
+
+        $_SESSION['message'] = "Update Data Successfully";
+        header("Location: ../Dashboard.php");
+
 }
-?>
+
+
+
+
+
+
+if (isset($_POST['add_product'])) {
+    check($sesiFromDatabase);
+    $name = mysqli_real_escape_string($con, $_POST['name']);
+    $image = $_FILES['picture']['name']; 
+    $imagesize = $_FILES['picture']['size']; 
+    $price = mysqli_real_escape_string($con, $_POST['price']);
+    $quantity = mysqli_real_escape_string($con, $_POST['quantity']);
+    $expiration_date = mysqli_real_escape_string($con, $_POST['expiration_date']);
+    $image_tmp_name = $_FILES['picture']['tmp_name'];
+    $image_folder = '../uploaded_img/' . $image;
+    $allowed_extensions = array('jpg', 'jpeg', 'png');
+    $image_extension = strtolower(pathinfo($image, PATHINFO_EXTENSION));
+    
+
+    $query = "INSERT INTO product (id_user,nama_product, gambar_product, harga_product, tanggal_exp_product,quantity) VALUES (?,?, ?, ?, ? ,?)";
+    $stmt = mysqli_prepare($con, $query);
+
+    $name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+    $price = htmlspecialchars($price, ENT_QUOTES, 'UTF-8');
+    $expiration_date = htmlspecialchars($expiration_date, ENT_QUOTES, 'UTF-8');
+    $quantity = htmlspecialchars($quantity, ENT_QUOTES, 'UTF-8');
+
+    mysqli_stmt_bind_param($stmt, "isssss",$sid, $name, $image, $price, $expiration_date, $quantity);
+
+    $add_product_query = mysqli_stmt_execute($stmt);
+
+    if (!in_array($image_extension, $allowed_extensions)) {
+        $_SESSION['message'] = 'Only JPEG, JPG, and PNG files are allowed';
+    }
+    else{
+    if ($add_product_query) {
+        if($imagesize > 2000000){
+            $_SESSION['message'] = 'Image size is too large';
+        }else{
+            if (move_uploaded_file($image_tmp_name, $image_folder)) {
+                $_SESSION['message'] = "Product Added Successfully";
+                header("Location: ../Addproduct.php");
+                
+                exit(0);
+            } else {
+                $_SESSION['message'] = "Product Not Created";
+                header("Location: ../Addproduct.php");
+                exit(0);
+            }
+        }
+
+    }else {
+        $_SESSION['message'] = "Error Adding Database";
+        header("Location: ../Addproduct.php");
+        exit(0);
+    }
+  }
+  mysqli_stmt_close($stmt);
+}

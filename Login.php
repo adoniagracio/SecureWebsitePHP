@@ -34,7 +34,7 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
         <div class="row">
             <div class="col-md-6">
                 <div class="card">
-                    <form class="box" action="Controllers/loginauth.php" method="POST">
+                    <form class="box" action="Controllers/loginauth.php" method="POST" onsubmit="return validateForm()">
                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token']; ?>" />
 
                         <h1>Sign In</h1>
@@ -44,6 +44,7 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
                             unset($_SESSION["error_message"]); 
                         }
                         ?>
+                        <div id="error-message" class="text-danger"></div>
                         <p class="text-muted"> Please enter your login and password!</p>
                         <input type="email" name="email" placeholder="Enter Email" id="email" required>
                         <input type="password" name="password" placeholder="Password" id="password" required>
@@ -62,5 +63,5 @@ if (isset($_SESSION['is_login']) && $_SESSION['is_login'] === true) {
         </div>
     </div>
 </body>
-<script src="asset/js/validation.js"></script>
+<script src="/asset/js/loginvalidation.js"></script>
 </html>

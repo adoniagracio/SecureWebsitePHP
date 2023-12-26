@@ -1,6 +1,11 @@
 <?php
 session_start();
 require 'Controllers/condb.php';
+
+if (!isset($_SESSION['is_login']) || !$_SESSION['is_login'] || !isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit(); 
+}
 ?>
 
 <!doctype html>
@@ -37,15 +42,22 @@ require 'Controllers/condb.php';
                             {
                                 $product = mysqli_fetch_array($query_run);
                                 ?>
-                                <form action="Controllers/delete&update.php" method="POST">
+                        <form action="Controllers/delete&update.php" method="POST" enctype="multipart/form-data">
                                     <input type="hidden" name="barang_id" value="<?= hash('sha256', $product['id_product']); ?>">
                                     <div class="mb-3">
                                 <label>Product Name</label>
-                                <input type="text" name="name" class="form-control">
+                                <input type="text" name="name" class="form-control" value="<?= $product['nama_product']; ?>" required>
                              </div>
+
+                             <label for="image">Product Picture</label> 
                             <div class="mb-3">
-                                <label>Product Picture</label>
-                                <input type="file" name="picture" class="form-control">
+                                <td><img src="<?= 'uploaded_img/' . $product['gambar_product']; ?>" alt="Product Image" style="width: 200px; height: 200px; margin-bottom:20px;"></td>
+                                <input type="file" name="image" class="form-control" value="<?= $product['gambar_product']; ?>">
+                            </div>
+         
+                             <div class="mb-3">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" name="quantity" class="form-control" value="<?= $product['quantity']; ?>" required>
                             </div>
                             <div class="mb-3">
                                 <label for="productPrice">Product Price (Rupiah)</label>
@@ -53,17 +65,15 @@ require 'Controllers/condb.php';
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Rp</span>
                                     </div>
-                                    <input type="text" name="price" class="form-control" id="priceInput" oninput="formatRupiah(this)">
+                                    <input type="text" name="price" class="form-control" id="priceInput" value="<?= $product['harga_product']; ?>" oninput="formatNominal(this)" required>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="expirationDate">Expiration Date</label>
-                                <input type="date" name="expiration_date" class="form-control">
+                                <input type="date" name="expiration_date" class="form-control" value="<?= $product['tanggal_exp_product']; ?>" required>
                             </div>
                             <div class="mb-3">
-                                 <button type="submit" name="update_product" class="btn btn-primary">
-                                            Update Product
-                                 </button>
+                                 <button type="submit" name="update_product" class="btn btn-primary">Update Product</button>
                             </div>
 
                        </form>
@@ -80,7 +90,7 @@ require 'Controllers/condb.php';
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./asset/js/addprocval.js"></script>
 </html>

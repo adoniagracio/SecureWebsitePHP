@@ -1,5 +1,11 @@
 <?php
 session_start();
+
+if (!isset($_SESSION['is_login']) || !$_SESSION['is_login'] || !isset($_SESSION['user_id'])) {
+  header("Location: login.php");
+  exit(); 
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +17,7 @@ session_start();
     <title>Add Product</title>
   </head>
   <body>
-    <div class="container mt-5"> <?php include('Controllers/message.php'); ?> <div class="row">
+    <div class="container mt-5"> <?php include('Controllers/message.php');  ?> <div class="row">
         <div class="col-md-12">
           <div class="card">
             <div class="card-header">
@@ -19,27 +25,34 @@ session_start();
               </h4>
             </div>
             <div class="card-body">
-              <form action="Controllers/delete&update.php" method="POST">
+              <form action="Controllers/delete&update.php" method="POST"  enctype="multipart/form-data" >
                 <div class="mb-3">
                   <label>Product Name</label>
-                  <input type="text" name="name" class="form-control">
+                  <input type="text" name="name" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                  <label>Product Picture</label>
-                  <input type="file" name="picture" class="form-control">
+                  <label for="picture">Product Picture</label>
+                  <input type="file" name="picture" accept="image/jpg, image/jpeg, image/png" class="form-control"  required>
                 </div>
+
+                <div class="mb-3">
+                  <label for="quantity">Quantity</label>
+                  <input type="number" name="quantity" class="form-control" required>
+                </div>
+
                 <div class="mb-3">
                   <label for="productPrice">Product Price (Rupiah)</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp</span>
                     </div>
-                    <input type="text" name="price" class="form-control" id="priceInput" oninput="formatRupiah(this)">
-                  </div>
+                    <input type="text" name="price" class="form-control" id="priceInput"  oninput="formatNominal(this)" required>
+                    </div>
                 </div>
+
                 <div class="mb-3">
                   <label for="expirationDate">Expiration Date</label>
-                  <input type="date" name="expiration_date" class="form-control">
+                  <input type="date" name="expiration_date" class="form-control" required>
                 </div>
                 <div class="mb-3">
                   <button type="submit" name="add_product" class="btn btn-primary">Add Product</button>
@@ -50,7 +63,7 @@ session_start();
         </div>
       </div>
     </div>
-    <script src="./asset/js/addprocval.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
+  <script src="./asset/js/addprocval.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </html>
