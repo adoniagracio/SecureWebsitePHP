@@ -1,32 +1,37 @@
-// function isValidEmail(email) {
-// 	const emailRegex = /\S+@\S+\.\S+/;
-// 	return emailRegex.test(email);
-// }
+function validateForm() {
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var password1 = document.getElementById("password").value;
+    var password = password1.replace(/\s+/g, ' ');
+    var phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+    var passwordRegex = /^(?!.* )(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(?=.*[0-9])(?=.*[A-Z]).{8,}$/;
 
-// if (!isValidPassword(password)) {
-//     console.log('Password is required');
-//     ErrorPopup();
-//     return;
-// }
+    clearErrorMessages(); 
 
-// function login(){
-//     const email = document.getElementById('email').value;
-//     const password = document.getElementById('password').value;
-//     if (!isValidEmail(email)) {
-//         console.log('Email is not valid, use this format "example@example.com"');
-// 		ErrorPopup();
-//         return;
-//     }
-//     if (!isValidPassword(password)) {
-//         console.log('Password is required');
-// 		ErrorPopup();
-//         return;
-//     }
-// }
+    if (name === '' || email === '' || phone === '' || password === '') {
+        displayErrorMessage('All fields must be filled out');
+        return false;
+    }
+    if (!phoneRegex.test(phone)) {
+        displayErrorMessage('Invalid phone');
+        return false;
+    }
+    if (!passwordRegex.test(password)) {
+        displayErrorMessage('Password must be at least 8 characters long and contain at least one special character, one number, and one uppercase letter.');
+        return false;
+    }
+    return true; 
+}
 
-const phoneInput = document.getElementById('phone');
+function displayErrorMessage(message) {
+    var errorMessageDiv = document.getElementById('error-message');
+    errorMessageDiv.innerHTML = message;
+}
 
-if (!/\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/.test(phoneInput)) {
-    alert("Please enter a valid Indonesian phone number!");
-    return false;
+function clearErrorMessages() {
+    var errorElements = document.querySelectorAll('.text-danger');
+    errorElements.forEach(function(element) {
+        element.innerHTML = '';
+    });
 }

@@ -12,7 +12,7 @@ require 'Controllers/condb.php';
     <title>Update Product</title>
 </head>
 <body>
-  
+
     <div class="container mt-5">
 
         <?php include('Controllers/message.php'); ?>
@@ -28,39 +28,22 @@ require 'Controllers/condb.php';
                     <div class="card-body">
 
                         <?php
-                        if(isset($_GET['id']))
-                        {
-                            $product_id = mysqli_real_escape_string($con, $_GET['id']);
-                            $query = "SELECT * FROM gnarab WHERE gnarab_ID='$product_id' ";
+                        if (isset($_POST['edit_product'])) 
+                         {
+                            $product_id = mysqli_real_escape_string($con, $_POST['product_id']);
+                            $query = "SELECT * FROM product WHERE SHA2(id_product, 256)='$product_id' ";
                             $query_run = mysqli_query($con, $query);
-
                             if(mysqli_num_rows($query_run) > 0)
                             {
                                 $product = mysqli_fetch_array($query_run);
                                 ?>
                                 <form action="Controllers/delete&update.php" method="POST">
-                                    <input type="hidden" name="barang_id" value="<?= $product['gnarab_ID']; ?>">
+                                    <input type="hidden" name="barang_id" value="<?= hash('sha256', $product['id_product']); ?>">
                                     <div class="mb-3">
                                 <label>Product Name</label>
                                 <input type="text" name="name" class="form-control">
                              </div>
-                            <div class="mb-3">
-                                <label>Product Picture</label>
-                                <input type="file" name="picture" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label for="productPrice">Product Price (Rupiah)</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp</span>
-                                    </div>
-                                    <input type="text" name="price" class="form-control" id="priceInput" oninput="formatRupiah(this)">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="expirationDate">Expiration Date</label>
-                                <input type="date" name="expiration_date" class="form-control">
-                            </div>
+                        
                             <div class="mb-3">
                                  <button type="submit" name="update_product" class="btn btn-primary">
                                             Update Product

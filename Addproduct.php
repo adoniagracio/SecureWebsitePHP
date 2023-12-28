@@ -24,23 +24,7 @@ session_start();
                   <label>Product Name</label>
                   <input type="text" name="name" class="form-control">
                 </div>
-                <div class="mb-3">
-                  <label>Product Picture</label>
-                  <input type="file" name="picture" class="form-control">
-                </div>
-                <div class="mb-3">
-                  <label for="productPrice">Product Price (Rupiah)</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp</span>
-                    </div>
-                    <input type="text" name="price" class="form-control" id="priceInput" oninput="formatRupiah(this)">
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label for="expirationDate">Expiration Date</label>
-                  <input type="date" name="expiration_date" class="form-control">
-                </div>
+          
                 <div class="mb-3">
                   <button type="submit" name="add_product" class="btn btn-primary">Add Product</button>
                 </div>

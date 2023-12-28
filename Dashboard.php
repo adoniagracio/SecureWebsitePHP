@@ -2,6 +2,25 @@
 session_start();
 require 'Controllers/condb.php';
 
+$sid = $_SESSION["user_id"];
+$query = "SELECT sesi FROM users WHERE id = '$sid';";
+$result = $con->query($query);
+
+if ($result) {
+    $row = $result->fetch_assoc();
+    $sesiFromDatabase = $row['sesi'];
+
+    // Periksa apakah session_id dari sesi saat ini tidak sama dengan sesi dari database
+    if ($_SESSION['session_id'] !== $sesiFromDatabase) {
+        header("Location: login.php");
+        session_unset();
+        session_destroy();
+        $_SESSION = array();
+        $_SESSION['is_login'] = false;
+        exit;
+    }
+}
+
 if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > 1800) {
     session_regenerate_id(true); // Regenerate session ID if inactive for more than 1800 seconds (30 minutes)
     $_SESSION['last_activity'] = time(); // Update last activity time
@@ -39,6 +58,10 @@ $result = $db->query($sql);
     <title>Dashboard</title>
 </head>
 <body> 
+    <?php 
+    $name = $_SESSION['username'];
+    echo "halo ". htmlspecialchars($name) ."!";
+    ?>
     <div class="container mt-4">
         <?php include('Controllers/message.php'); ?>
         <div class="row">
@@ -69,24 +92,30 @@ $result = $db->query($sql);
                                     if(mysqli_num_rows($query_run) > 0)
                                     {
                                         foreach($query_run as $barang)
-                                        {
-                                            ?>
-                                            <tr>
-                                                <td><?= $barang['nama_product']; ?></td>
-                                                <td>
-                                                    <a href="UpdateBarang.php?id=<?= $barang['id_product']; ?>" class="btn btn-success btn-sm">Edit</a>
-                                                    <form action="Controllers/delete&update.php" method="POST" class="d-inline">
-                                                        <button type="submit" name="delete_product" value="<?=$barang['id_product'];?>" class="btn btn-danger btn-sm">Delete</button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                            <?php
+                                            {
+                                                ?>                                         
+                                                <tr>
+                                                    <td><?= $barang['nama_product']; ?></td>
+                                                    <td>
+                                                    <form action="UpdateBarang.php" method="POST" class="d-inline">
+                                                    <input type="hidden" name="product_id" value="<?= hash('sha256', $barang['id_product']); ?>">
+                                                            <button type="submit" name="edit_product" class="btn btn-success btn-sm">Edit</button>
+                                                        </form>
+
+                                                        <form action="Controllers/delete&update.php" method="POST" class="d-inline">
+                                                            <input type="hidden" name="barang_id" value="<?= hash('sha256', $barang['id_product']); ?>">
+                                                            <button type="submit" name="delete_product" class="btn btn-danger btn-sm">Delete</button>
+                                                        </form>
+
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                            }
                                         }
-                                    }
-                                    else
-                                    {
-                                        echo "<h5> No Record Found </h5>";
-                                    }
+                                        else
+                                        {
+                                            echo "<h5> No Record Found </h5>";
+                                        }
                                 ?> 
                             </tbody>
                         </table>
